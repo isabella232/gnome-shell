@@ -16,7 +16,6 @@ const TOUCHPAD_BASE_WIDTH = 400;
 const EVENT_HISTORY_THRESHOLD_MS = 150;
 
 const SCROLL_MULTIPLIER = 10;
-const SWIPE_MULTIPLIER = 0.5;
 
 const MIN_ANIMATION_DURATION = 100;
 const MAX_ANIMATION_DURATION = 400;
@@ -135,7 +134,7 @@ const TouchpadSwipeGesture = GObject.registerClass({
         let time = event.get_time();
 
         let [x, y] = event.get_coords();
-        let [dx, dy] = event.get_gesture_motion_delta();
+        const [dx, dy] = event.get_gesture_motion_delta_unaccelerated();
 
         if (this._state === TouchpadState.NONE && dx === 0 && dy === 0)
             return Clutter.EVENT_PROPAGATE;
@@ -155,7 +154,7 @@ const TouchpadSwipeGesture = GObject.registerClass({
         }
 
         const vertical = this.orientation === Clutter.Orientation.VERTICAL;
-        let delta = (vertical ? dy : dx) * SWIPE_MULTIPLIER;
+        let delta = vertical ? dy : dx;
         const distance = vertical ? TOUCHPAD_BASE_HEIGHT : TOUCHPAD_BASE_WIDTH;
 
         switch (event.get_gesture_phase()) {
