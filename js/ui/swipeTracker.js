@@ -94,7 +94,7 @@ const TouchpadSwipeGesture = GObject.registerClass({
         'orientation': GObject.ParamSpec.enum(
             'orientation', 'orientation', 'orientation',
             GObject.ParamFlags.READWRITE,
-            Clutter.Orientation, Clutter.Orientation.VERTICAL),
+            Clutter.Orientation, Clutter.Orientation.HORIZONTAL),
     },
     Signals: {
         'begin':  { param_types: [GObject.TYPE_UINT, GObject.TYPE_DOUBLE, GObject.TYPE_DOUBLE] },
@@ -218,7 +218,7 @@ const TouchSwipeGesture = GObject.registerClass({
         'orientation': GObject.ParamSpec.enum(
             'orientation', 'orientation', 'orientation',
             GObject.ParamFlags.READWRITE,
-            Clutter.Orientation, Clutter.Orientation.VERTICAL),
+            Clutter.Orientation, Clutter.Orientation.HORIZONTAL),
     },
     Signals: {
         'begin':  { param_types: [GObject.TYPE_UINT, GObject.TYPE_DOUBLE, GObject.TYPE_DOUBLE] },
@@ -314,7 +314,7 @@ const ScrollGesture = GObject.registerClass({
         'orientation': GObject.ParamSpec.enum(
             'orientation', 'orientation', 'orientation',
             GObject.ParamFlags.READWRITE,
-            Clutter.Orientation, Clutter.Orientation.VERTICAL),
+            Clutter.Orientation, Clutter.Orientation.HORIZONTAL),
         'scroll-modifiers': GObject.ParamSpec.flags(
             'scroll-modifiers', 'scroll-modifiers', 'scroll-modifiers',
             GObject.ParamFlags.READWRITE,
@@ -442,7 +442,7 @@ var SwipeTracker = GObject.registerClass({
         'orientation': GObject.ParamSpec.enum(
             'orientation', 'orientation', 'orientation',
             GObject.ParamFlags.READWRITE,
-            Clutter.Orientation, Clutter.Orientation.VERTICAL),
+            Clutter.Orientation, Clutter.Orientation.HORIZONTAL),
         'distance': GObject.ParamSpec.double(
             'distance', 'distance', 'distance',
             GObject.ParamFlags.READWRITE,
@@ -462,10 +462,11 @@ var SwipeTracker = GObject.registerClass({
         'end':    { param_types: [GObject.TYPE_UINT64, GObject.TYPE_DOUBLE] },
     },
 }, class SwipeTracker extends GObject.Object {
-    _init(actor, allowedModes, params) {
+    _init(actor, orientation, allowedModes, params) {
         super._init();
         params = Params.parse(params, { allowDrag: true, allowScroll: true });
 
+        this.orientation = orientation;
         this._allowedModes = allowedModes;
         this._enabled = true;
         this._allowLongSwipes = false;
@@ -478,7 +479,8 @@ var SwipeTracker = GObject.registerClass({
         this._touchpadGesture.connect('update', this._updateGesture.bind(this));
         this._touchpadGesture.connect('end', this._endTouchpadGesture.bind(this));
         this.bind_property('enabled', this._touchpadGesture, 'enabled', 0);
-        this.bind_property('orientation', this._touchpadGesture, 'orientation', 0);
+        this.bind_property('orientation', this._touchpadGesture, 'orientation',
+            GObject.BindingFlags.SYNC_CREATE);
 
         this._touchGesture = new TouchSwipeGesture(allowedModes,
             GESTURE_FINGER_COUNT,
@@ -488,7 +490,8 @@ var SwipeTracker = GObject.registerClass({
         this._touchGesture.connect('end', this._endTouchGesture.bind(this));
         this._touchGesture.connect('cancel', this._cancelTouchGesture.bind(this));
         this.bind_property('enabled', this._touchGesture, 'enabled', 0);
-        this.bind_property('orientation', this._touchGesture, 'orientation', 0);
+        this.bind_property('orientation', this._touchGesture, 'orientation',
+            GObject.BindingFlags.SYNC_CREATE);
         this.bind_property('distance', this._touchGesture, 'distance', 0);
         global.stage.add_action(this._touchGesture);
 
@@ -500,7 +503,8 @@ var SwipeTracker = GObject.registerClass({
             this._dragGesture.connect('end', this._endTouchGesture.bind(this));
             this._dragGesture.connect('cancel', this._cancelTouchGesture.bind(this));
             this.bind_property('enabled', this._dragGesture, 'enabled', 0);
-            this.bind_property('orientation', this._dragGesture, 'orientation', 0);
+            this.bind_property('orientation', this._dragGesture, 'orientation',
+                GObject.BindingFlags.SYNC_CREATE);
             this.bind_property('distance', this._dragGesture, 'distance', 0);
             actor.add_action(this._dragGesture);
         } else {
@@ -513,7 +517,8 @@ var SwipeTracker = GObject.registerClass({
             this._scrollGesture.connect('update', this._updateGesture.bind(this));
             this._scrollGesture.connect('end', this._endTouchpadGesture.bind(this));
             this.bind_property('enabled', this._scrollGesture, 'enabled', 0);
-            this.bind_property('orientation', this._scrollGesture, 'orientation', 0);
+            this.bind_property('orientation', this._scrollGesture, 'orientation',
+                GObject.BindingFlags.SYNC_CREATE);
             this.bind_property('scroll-modifiers',
                 this._scrollGesture, 'scroll-modifiers', 0);
         } else {
